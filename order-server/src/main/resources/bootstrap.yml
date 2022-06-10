@@ -1,0 +1,53 @@
+nacos:
+  server-addr: localhost:8761,localhost:8763
+
+server:
+  port: 8081
+
+spring:
+  application:
+    name: order-server
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${nacos.server-addr}
+      config:
+        server-addr: ${nacos.server-addr}
+        file-extension: yml
+        shared-configs:
+          - dataId: order-server.yml
+            refresh: true
+          - dataId: order-server2.yml
+            refresh: true
+    sentinel:
+      transport:
+        dashboard: localhost:8765
+      datasource:
+        ds1-flow:
+          nacos:
+            server-addr: ${nacos.server-addr}
+            username: nacos
+            password: nacos
+            namespace: 8de61906-070b-49e9-a66f-14b07c20b632
+            dataId: ${spring.application.name}-flow-rules
+            groupId: SENTINEL_GROUP
+            data-type: json
+            rule-type: flow
+
+seata:
+  enabled: true # 开启
+  application-id: order-server # application id
+  tx-service-group: default_group # 事务分组 对应config.txt的service.vgroupMapping.my_test_tx_group=default 默认AT
+  enable-auto-data-source-proxy: true # 开启数据源自动代理
+  config:
+    type: nacos
+    nacos:
+      namespace: c3d26581-7a75-447f-bb49-897807adf910  # namespace
+      serverAddr: ${nacos.server-addr} #nacos服务地址
+      group:  SEATA_GROUP # group 分组
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server  # 应用名称 和registry.conf的application对应 是nacos中的服务名
+      server-addr: ${nacos.server-addr}  # nacos 服务地址
+      namespace: c3d26581-7a75-447f-bb49-897807adf910   # namespace命名空间 默认public
